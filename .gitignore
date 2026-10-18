@@ -1,0 +1,12 @@
+node_modules/
+dist/
+# Local Postgres (PGlite) data, generated JWT secret and saved emails.
+server/.data/
+.env
+*.log
+
+# Free media originals downloaded by client/scripts/fetch-media.js (processed copies live in client/public/media).
+client/media-src/
+# Design review screenshots and contact sheets (regenerate with client/scripts/shots.mjs).
+design/screens/
+design/sheets/

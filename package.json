@@ -1,0 +1,14 @@
+{
+  "name": "hopin",
+  "version": "0.3.0",
+  "private": true,
+  "description": "Hopin - ride-hailing app (React + Tailwind, Express + Socket.IO, PostgreSQL)",
+  "scripts": {
+    "setup": "npm install --prefix server && npm install --prefix client",
+    "create-admin": "npm run create-admin --prefix server",
+    "dev:api": "npm start --prefix server",
+    "dev:web": "npm run dev --prefix client",
+    "test": "npm test --prefix server",
+    "build": "npm run build --prefix client"
+  }
+}

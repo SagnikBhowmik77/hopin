@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#14161a" />
+    <title>Hopin · offline</title>
+    <style>
+      body { margin: 0; min-height: 100dvh; display: grid; place-items: center; background: #14161a; color: #f4f4f5; font-family: system-ui, sans-serif; text-align: center; padding: 24px; box-sizing: border-box; }
+      h1 { font-size: 1.4rem; margin: 16px 0 8px; }
+      p { color: #a1a1aa; max-width: 22rem; line-height: 1.5; margin: 0 auto 20px; }
+      .btn { display: inline-block; background: #ffc23d; color: #14161a; font-weight: 700; padding: 12px 20px; border-radius: 12px; text-decoration: none; }
+      .sos { display: block; margin-top: 28px; color: #ff6b5e; font-weight: 600; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <img src="/icons/icon-192.png" width="72" height="72" alt="" />
+      <h1>You're offline</h1>
+      <p>Hopin needs the internet to book rides and track your driver. Check your connection and try again.</p>
+      <a class="btn" href="/" onclick="location.reload(); return false;">Try again</a>
+      <a class="sos" href="tel:112">Emergency? Call 112</a>
+    </main>
+  </body>
+</html>

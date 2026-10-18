@@ -1,0 +1,31 @@
+{
+  "name": "hopin-server",
+  "version": "0.2.0",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=22" },
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js",
+    "create-admin": "node src/create-admin.js",
+    "test-email": "node src/send-test-email.js",
+    "test": "node --test \"test/**/*.test.js\""
+  },
+  "dependencies": {
+    "@electric-sql/pglite": "^0.3.7",
+    "cors": "^2.8.5",
+    "express": "^5.1.0",
+    "express-rate-limit": "^7.5.1",
+    "helmet": "^8.1.0",
+    "jose": "^6.2.12",
+    "nodemailer": "^10.1.2",
+    "pdfkit": "^0.17.2",
+    "pg": "^8.16.3",
+    "socket.io": "^4.8.1",
+    "web-push": "^3.6.7"
+  },
+  "devDependencies": {
+    "socket.io-client": "^4.8.1"
+  }
+}

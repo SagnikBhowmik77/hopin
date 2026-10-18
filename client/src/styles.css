@@ -1,0 +1,418 @@
+@import 'tailwindcss';
+@import './ds/ds.css';
+
+/*
+ * Hopin design tokens.
+ * Tailwind v4 keeps theme tokens in CSS (@theme) instead of tailwind.config.js; every value here
+ * is also a CSS variable, so components and plain CSS share one source of truth.
+ *
+ * Brand: the Kolkata yellow taxi. One accent (taxi yellow) for the main action on each screen,
+ * near-black warm ink, warm off-white grounds. Light and dark are both first-class.
+ * Every text/background pair below was checked for WCAG AA (see /design-preview).
+ */
+@theme inline {
+  /* colour roles (flip with the theme) */
+  --color-ground: var(--ground);
+  --color-surface: var(--surface);
+  --color-raised: var(--raised);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-fg: var(--fg);
+  --color-fg-2: var(--fg-2);
+  --color-fg-3: var(--fg-3);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-press: var(--accent-press);
+  --color-accent-fg: var(--accent-fg);
+  --color-accent-soft: var(--accent-soft);
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-soft);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-danger-fg: var(--danger-fg);
+  /* fixed brand ink: always dark (dark panels, text on yellow) */
+  --color-ink: #17150f;
+  --color-taxi: #ffc21a;
+
+  /* legacy names used by screens not yet redesigned; they point at the new roles */
+  --color-bg: var(--ground);
+  --color-muted: var(--fg-2);
+  --color-ok: var(--success);
+  --color-ok-soft: var(--success-soft);
+  --color-brand: var(--accent);
+  --color-brand-soft: var(--accent-soft);
+
+  /* type: a characterful display face for headings, a highly readable face for everything else.
+     Mukta (Ek Type, Mumbai) also covers Devanagari, so Hindi uses the same body face. */
+  --font-display: 'Bricolage Grotesque Variable', 'Mukta', ui-sans-serif, system-ui, sans-serif;
+  --font-sans: 'Mukta', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  /* type scale (mobile-first; display sizes grow on wide screens) */
+  --text-caption: 0.8125rem; /* 13px */
+  --text-caption--line-height: 1.35;
+  --text-small: 0.9375rem; /* 15px */
+  --text-small--line-height: 1.45;
+  --text-body: 1.0625rem; /* 17px: outdoors, one hand, bright sun */
+  --text-body--line-height: 1.5;
+  --text-heading: 1.25rem; /* 20px */
+  --text-heading--line-height: 1.25;
+  --text-title: 1.625rem; /* 26px */
+  --text-title--line-height: 1.1;
+  --text-display: clamp(2.25rem, 1.6rem + 3.2vw, 4rem); /* 36 -> 64px */
+  --text-display--line-height: 1;
+
+  /* radius: decided once. Controls use md; sheets and large cards use xl. */
+  --radius-xs: 6px;
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-xl: 28px;
+
+  /* elevation: only for things that float above other content (map controls, sheets, dialogs).
+     Nothing sits on a shadow at rest. Shadows are tinted with the warm ink, one light from above. */
+  --shadow-float: 0 1px 2px rgb(23 21 15 / 0.08), 0 4px 12px rgb(23 21 15 / 0.08);
+  --shadow-sheet: 0 -1px 0 rgb(23 21 15 / 0.04), 0 -12px 32px rgb(23 21 15 / 0.12);
+  --shadow-dialog: 0 24px 64px rgb(23 21 15 / 0.24), 0 2px 8px rgb(23 21 15 / 0.08);
+
+  /* motion */
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+}
+
+:root {
+  /* spacing: Tailwind's 4px scale; use 1,2,3,4,5,6,8,10,12,16 (4-64px). */
+  --dur-fast: 120ms;
+  --dur-base: 180ms;
+  --dur-slow: 240ms;
+
+  /* z-index scale */
+  --z-map: 0;
+  --z-header: 40;
+  --z-sheet: 50;
+  --z-overlay: 60;
+  --z-dialog: 70;
+  --z-toast: 80;
+}
+
+/* ---- light (default) -------------------------------------------------------- */
+:root {
+  --ground: #f6f2ea;
+  --surface: #fffdf8;
+  --raised: #ede7da;
+  --line: #ddd4c3;
+  --line-strong: #857a65; /* control borders: 3:1 on every surface */
+  --fg: #17150f;
+  --fg-2: #57503f;
+  --fg-3: #675e4c;
+  --accent: #ffc21a;
+  --accent-hover: #f5b400;
+  --accent-press: #e6a800;
+  --accent-fg: #17150f;
+  --accent-soft: #fff0c2;
+  --success: #146c3c;
+  --success-soft: #e1f1e6;
+  --warning: #8f4d00;
+  --warning-soft: #fbecd2;
+  --danger: #b42318;
+  --danger-soft: #fbe6e2;
+  --danger-fg: #ffffff;
+  --focus: #17150f;
+  --scrim: rgb(23 21 15 / 0.5);
+  color-scheme: light;
+}
+
+/* ---- dark: by system setting, unless the person picked a theme ----------------- */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --ground: #100f0c;
+    --surface: #1a1813;
+    --raised: #25221b;
+    --line: #38332a;
+    --line-strong: #7d7564;
+    --fg: #f5f0e6;
+    --fg-2: #c2b9a8;
+    --fg-3: #9a917f;
+    --accent: #ffc21a;
+    --accent-hover: #ffcd47;
+    --accent-press: #f5b400;
+    --accent-fg: #17150f;
+    --accent-soft: #3a2e0e;
+    --success: #4cc38a;
+    --success-soft: #12291c;
+    --warning: #f0a64a;
+    --warning-soft: #33230c;
+    --danger: #ff7a6b;
+    --danger-soft: #3a1612;
+    --danger-fg: #17150f;
+    --focus: #ffc21a;
+    --scrim: rgb(0 0 0 / 0.6);
+    color-scheme: dark;
+  }
+}
+:root[data-theme='dark'] {
+  --ground: #100f0c;
+  --surface: #1a1813;
+  --raised: #25221b;
+  --line: #38332a;
+  --line-strong: #7d7564;
+  --fg: #f5f0e6;
+  --fg-2: #c2b9a8;
+  --fg-3: #9a917f;
+  --accent: #ffc21a;
+  --accent-hover: #ffcd47;
+  --accent-press: #f5b400;
+  --accent-fg: #17150f;
+  --accent-soft: #3a2e0e;
+  --success: #4cc38a;
+  --success-soft: #12291c;
+  --warning: #f0a64a;
+  --warning-soft: #33230c;
+  --danger: #ff7a6b;
+  --danger-soft: #3a1612;
+  --danger-fg: #17150f;
+  --focus: #ffc21a;
+  --scrim: rgb(0 0 0 / 0.6);
+  color-scheme: dark;
+}
+
+/* ---- base ---------------------------------------------------------------------------- */
+/* In a layer so any utility class (focus-visible:outline-none, font-sans…) can override it. */
+@layer base {
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+  body {
+    background: var(--ground);
+    color: var(--fg);
+    font-family: var(--font-sans);
+    font-size: var(--text-body);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    -webkit-tap-highlight-color: transparent;
+    text-rendering: optimizeLegibility;
+  }
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+  }
+  p {
+    text-wrap: pretty;
+  }
+  :focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ---- legacy component classes (screens not yet redesigned), on the new tokens ------------ */
+@layer components {
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 44px;
+  border-radius: var(--radius-md);
+  padding: 0.6rem 1.1rem;
+  font-weight: 600;
+  font-size: var(--text-small);
+  line-height: 1.2;
+  transition:
+    background-color var(--dur-fast) var(--ease-standard),
+    transform var(--dur-fast) var(--ease-standard),
+    opacity var(--dur-fast) var(--ease-standard);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.btn:active:not(:disabled) {
+  transform: translateY(1px);
+}
+.btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.btn-primary {
+  background: var(--fg);
+  color: var(--ground);
+}
+.btn-primary:hover:not(:disabled) {
+  opacity: 0.88;
+}
+.btn-brand {
+  background: var(--accent);
+  color: var(--accent-fg);
+}
+.btn-brand:hover:not(:disabled) {
+  background: var(--accent-hover);
+}
+.btn-ghost {
+  background: var(--raised);
+  color: var(--fg);
+}
+.btn-ghost:hover:not(:disabled) {
+  background: var(--line);
+}
+.btn-danger {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+.btn-sm {
+  min-height: 44px;
+  padding: 0.45rem 0.85rem;
+  font-size: var(--text-caption);
+  border-radius: var(--radius-sm);
+}
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+}
+.input {
+  width: 100%;
+  min-height: 48px;
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-md);
+  padding: 0.65rem 0.9rem;
+  font-size: var(--text-body);
+  color: var(--fg);
+  outline: none;
+  transition:
+    border-color var(--dur-fast) var(--ease-standard),
+    box-shadow var(--dur-fast) var(--ease-standard);
+}
+.input:focus {
+  border-color: var(--fg);
+  box-shadow: 0 0 0 1px var(--fg);
+}
+.input::placeholder {
+  color: var(--fg-3);
+}
+.label {
+  display: block;
+  font-size: var(--text-small);
+  font-weight: 600;
+  color: var(--fg);
+  margin-bottom: 0.35rem;
+}
+
+}
+
+/* ---- map ------------------------------------------------------------------------------ */
+.pin {
+  width: 28px;
+  height: 36px;
+  position: relative;
+}
+.pin span {
+  position: absolute;
+  left: 4px;
+  top: 2px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50% 50% 50% 0;
+  transform: rotate(-45deg);
+  box-shadow: 0 2px 6px rgb(23 21 15 / 0.35);
+  border: 3px solid #fff;
+}
+.pin-pickup span {
+  background: var(--success);
+}
+.pin-drop span {
+  background: #17150f;
+}
+.pin-stop span {
+  background: #ffc21a;
+}
+.vehicle-pin {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  font-size: 22px;
+  background: #ffc21a;
+  color: #17150f;
+  border-radius: 50%;
+  box-shadow: 0 3px 10px rgb(23 21 15 / 0.3);
+  border: 2px solid #17150f;
+  transition: transform 0.9s linear;
+}
+.me-dot {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #17150f;
+  border: 3px solid #ffc21a;
+  box-shadow: 0 0 0 6px rgb(255 194 26 / 0.3);
+}
+.route-casing {
+  stroke: #17150f;
+  stroke-opacity: 0.2;
+}
+.route-line {
+  stroke: #17150f;
+}
+.route-approach {
+  stroke: #57503f;
+}
+.leaflet-container {
+  font-family: var(--font-sans);
+  background: var(--raised);
+  /* Leaflet stacks its panes at z-index 400-700; keep them inside the map so sheets,
+     dialogs and toasts on our z-index scale always sit above it. */
+  isolation: isolate;
+}
+/* Muted, slightly warm map so the route, pins and the yellow action carry the screen. */
+.leaflet-tile-pane {
+  filter: saturate(0.35) sepia(0.12) contrast(1.02) brightness(1.02);
+}
+.leaflet-marker-icon.vehicle-moving {
+  transition: transform 0.9s linear;
+}
+/* OSM tiles have no dark style; invert them so the map does not glare at night. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .leaflet-tile-pane {
+    filter: invert(1) hue-rotate(180deg) brightness(0.9) contrast(0.85) saturate(0.25) sepia(0.1);
+  }
+  :root:not([data-theme='light']) .route-line {
+    stroke: #ffc21a;
+  }
+}
+:root[data-theme='dark'] .leaflet-tile-pane {
+  filter: invert(1) hue-rotate(180deg) brightness(0.9) contrast(0.85) saturate(0.25) sepia(0.1);
+}
+:root[data-theme='dark'] .route-line {
+  stroke: #ffc21a;
+}
+
+@keyframes pulse-ring {
+  0% {
+    transform: scale(0.6);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(2.2);
+    opacity: 0;
+  }
+}
+.pulse-ring {
+  animation: pulse-ring 1.6s var(--ease-out) infinite;
+}

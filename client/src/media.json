@@ -1,0 +1,40 @@
+{
+  "video": {
+    "mp4": "/media/login-kolkata.mp4",
+    "webm": "/media/login-kolkata.webm",
+    "poster": "/media/login-kolkata-poster.webp",
+    "posterJpg": "/media/login-kolkata-poster.jpg"
+  },
+  "photos": {
+    "onboard-book": {
+      "webp": "/media/onboarding/onboard-book-480.webp 480w, /media/onboarding/onboard-book-960.webp 960w, /media/onboarding/onboard-book-1440.webp 1440w",
+      "avif": "/media/onboarding/onboard-book-480.avif 480w, /media/onboarding/onboard-book-960.avif 960w, /media/onboarding/onboard-book-1440.avif 1440w",
+      "placeholder": "data:image/webp;base64,UklGRswAAABXRUJQVlA4IMAAAAAwBQCdASoYABQAPu1orVCppaQiqAqpMB2JaACdAYyKXls3QobnNTsg/mFlYL1PTZ1fQAD+QAo3srJuc8nbv6htXH1NcxeIC2ojfOffOPYKD8CrDS7Z4Zd29B+fIHJQACEkshAg7CufRlfk/PURnhxoQ2gMZy5pHexFpFbFhhL+5nWyWuI+K8LGffOWozkZSXA8uKWNemgBmKq+xC/XW0aBXF9DIrbreUGOGYDEPBJ2VN4M8Kc46jTlbvTaPBwAAAA=",
+      "fallback": "/media/onboarding/onboard-book-960.webp"
+    },
+    "onboard-safe": {
+      "webp": "/media/onboarding/onboard-safe-480.webp 480w, /media/onboarding/onboard-safe-960.webp 960w, /media/onboarding/onboard-safe-1440.webp 1440w",
+      "avif": "/media/onboarding/onboard-safe-480.avif 480w, /media/onboarding/onboard-safe-960.avif 960w, /media/onboarding/onboard-safe-1440.avif 1440w",
+      "placeholder": "data:image/webp;base64,UklGRhYBAABXRUJQVlA4IAoBAADwBQCdASoYACAAPu1usFIppiSiqAgBMB2JbACdMuI31FyByvxvOw9gq38uCE4WuDh8PN9y7yiCfAD++uclc1CoDM8jbD6nFTOd6CgYGKcL/3vNCkCxThPwAqe6Mm/6OKruuZCswhHPlfG8gjSnWnk2LP/cyiqzNh6Ezc7Ay03Y+DNCFzAqVXnY3tv/YkBBkvkbWoodiyUEPswmvk5DyyL3X12bVJr7c7If/aertkh5CfjnuR5j3VKNXJkE/T0c7IEIhOLAR64v9ct73sircyHf/x75iUiLqHE6ZJZikqYW26x1dQ4HxfhSSJFbOHSbXXZTbetXrDlI+mCnluMEtsGZbAr3Hc8BMQAAAA==",
+      "fallback": "/media/onboarding/onboard-safe-960.webp"
+    },
+    "onboard-pay": {
+      "webp": "/media/onboarding/onboard-pay-480.webp 480w, /media/onboarding/onboard-pay-960.webp 960w, /media/onboarding/onboard-pay-1440.webp 1440w",
+      "avif": "/media/onboarding/onboard-pay-480.avif 480w, /media/onboarding/onboard-pay-960.avif 960w, /media/onboarding/onboard-pay-1440.avif 1440w",
+      "placeholder": "data:image/webp;base64,UklGRpYBAABXRUJQVlA4IIoBAADQBwCdASoYACQAPu1qrFCppaQiqqgBMB2JbAC2+77GxGH3QDrpELCBmRmCUBSHu7CtienTb1/7AK6vLlcFCQxMogRwlWU4AAD+ouI7f8mC1EL8tFykfdtko4vQjes4ta32NvY5uznsOrJpYGZvH/imLunAikjmwRGB2I+xd4bbs78e3VFjdX4upiv3I3+2i+D7SVY3mXjRhVZVnSe0y2nLI91DYJ+u9uS3fh8EZ/lIEgHHpk/i1jkLR8cQKmZRGIqu4wCD4O/EpxxFompv7AxSUew3w2Ck/w+hJEpngW7DA13rBBWCCCSyjHTtNjQNjjE3Hiim+BeIopnRgr1BQYOmcUR4VV8PjRaboWa+2WfoaW9BTJ+t1imGEABUWfzQZxOPo6fIZUSrRrfu92aTcErIyqNygDIrzwfeH6yERXYCZfg4egKp7smzJgUKm3VYqQ/y7kJnf0rN7dwJ1aLqN/AW2SkGCuG5HHD8BuscvXHtkPrGex+MTRfO3JtgNjh06SpUSTV1cleS4AAA",
+      "fallback": "/media/onboarding/onboard-pay-960.webp"
+    }
+  },
+  "lottie": {
+    "searching": "/media/lottie/searching.json",
+    "payment-success": "/media/lottie/payment-success.json",
+    "trip-complete": "/media/lottie/trip-complete.json",
+    "empty-trips": "/media/lottie/empty-trips.json",
+    "no-internet": "/media/lottie/no-internet.json"
+  },
+  "illustrations": {
+    "order-a-ride": "/media/illustrations/order-a-ride.svg",
+    "empty-mailbox": "/media/illustrations/empty-mailbox.svg",
+    "quality-time": "/media/illustrations/quality-time.svg"
+  }
+}
