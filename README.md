@@ -10,8 +10,8 @@ React 19 · Express 5 · Socket.IO · PostgreSQL (Supabase) · Razorpay · Engli
 
 | | Link |
 |---|---|
-| Frontend (Vercel) | _add after deploying_ |
-| Backend API (Render) | _add after deploying_ |
+| Frontend (Vercel) | https://hopin-cyan.vercel.app |
+| Backend API (Render) | https://hopin-api-cm3q.onrender.com/api/health (free tier: first request after a quiet spell takes about 50 s) |
 | Demo video | _add link_ |
 | Source | https://github.com/SagnikBhowmik77/hopin |
 
