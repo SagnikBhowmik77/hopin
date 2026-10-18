@@ -1,111 +1,343 @@
+<div align="center">
+
+<img src="client/public/icons/icon-192.png" width="72" alt="Hopin logo" />
+
 # Hopin
 
-A ride-hailing app: riders book bikes, autos and cabs, drivers accept and drive, and the trip updates live for everyone.
+**Kolkata's own ride app. Bikes, autos and cabs with upfront fares, live tracking, OTP-verified pickups and a real SOS button.**
 
-**Rule for this project:** nothing in Hopin is simulated. A feature whose service isn't connected yet says so plainly and refuses; it never pretends. See `HOPIN_PLAN.md` for the step-by-step plan.
+React 19 · Express 5 · Socket.IO · PostgreSQL (Supabase) · Razorpay · English + हिन्दी · installable PWA
 
-## What Hopin runs on right now
+| | Link |
+|---|---|
+| Frontend (Vercel) | _add after deploying_ |
+| Backend API (Render) | _add after deploying_ |
+| Demo video | _add link_ |
+| Source | https://github.com/SagnikBhowmik77/hopin |
 
-| Part | In use | Notes |
-| --- | --- | --- |
-| Backend | Node.js + Express 5 | REST API in `server/src/routes` |
-| Real-time | Socket.IO (WebSockets) | ride status, driver location, notifications |
-| Database | PostgreSQL on **Supabase** | numbered migrations in `server/migrations` (run on start); Row Level Security on every table |
-| Auth | **Supabase Auth** | email + password with email verification, Google sign-in; Hopin verifies Supabase's ES256 tokens and stores no passwords |
-| Maps / routing / search | OpenStreetMap tiles, OSRM, Photon → Nominatim | free public servers; provider choice is step 11 |
-| Frontend | React 19 + Vite + Tailwind CSS 4 | |
+<img src="docs/screenshots/rider-2-choose-desktop.webp" width="900" alt="Choosing a ride on desktop: bike, auto and cab fares beside a map of Kolkata" />
 
-## Connected vs not connected yet
+</div>
 
-| Service | State | What happens |
-| --- | --- | --- |
-| Cash payments | ✅ works | the driver confirms collection |
-| Wallet | ✅ works | debits the real ledger balance; the balance starts at ₹0 |
-| Card / UPI payments, wallet top-up | ✅ connected (Razorpay TEST mode; UPI not yet enabled on the Razorpay account) | Razorpay Checkout; Hopin sets the amount, then checks the signature and asks Razorpay to confirm the payment before marking anything paid |
-| Refunds, fare disputes | ✅ works | admin refunds through Razorpay's refund API or to the Hopin wallet; never more than was paid; driver share adjusted |
-| Rider–driver chat | ✅ works | in-app, stored in Postgres (`ride_messages`), live over Socket.IO, read receipts; open only while a driver is assigned, read-only after. Phone numbers are never sent to the other party |
-| Route-deviation alerts | ✅ works (needs a real moving trip to see live) | during a trip, driver GPS is compared with the saved OSRM road route; >500 m for 30 s opens an alert (stored in `route_deviations`) shown to rider (with SOS), driver and admins; closes when back within 300 m or the trip ends. GPS fixes worse than 100 m are ignored; trips booked while routing was down are not watched, and the app says so |
-| Scheduled rides | ✅ works | book 30 min–7 days ahead (max 5 upcoming); fare fixed at booking without surge; offered to drivers 15 min before pickup, re-offered each minute until 5 min after pickup, then cancelled with a notification; free to cancel before it goes out; cancelled with a reason if the rider is in another ride or the server missed the time |
-| Saved places | ✅ works | Home, Work and up to 20 named places per user (`saved_places`); one-tap chips on the booking screen, managed in Profile |
-| Safety basics (step 8b A) | ✅ works | own trip PIN; long-stop alert (6 min within 60 m, away from pickup/stops/drop) with "I'm OK"; "Reached safely?" after 10 pm–6 am trips (no answer in 10 min texts emergency contacts + alerts admins); 108 ambulance next to 112; helmet/seatbelt reminders; bike drivers send a daily helmet selfie reviewed by admins; drivers moving above 10 km/h can send only quick replies |
-| Fair money (step 8b B) | ✅ works | one ledger function (`postTxn`) so every wallet equals its history; cash rides: driver keeps the cash, Hopin's 20% comes from their wallet (drivers may go below ₹0, riders never); tips ₹10–500 (wallet or Razorpay, 100% to driver); fare splits between Hopin riders (wallet or Razorpay); late driver cancel credits the rider the cancel fee from the driver; long detour after a route alert auto-opens a fare dispute; fare breakdown (driver vs Hopin) on trip page and PDF; open surge counts + "tell me when it's normal" (30 min) |
-| Ways to book (step 8b C) | ✅ works | book for someone else (passenger gets driver + own code by SMS; driver sees name only); hourly rentals (packages, no fixed drop, GPS distance, extra km/min at the end, no surge/promo) + seasonal Puja packages and admin road closures with a source; parcels (size decides vehicle, receiver gets a delivery code by SMS, driver finishes only with it); accessibility requests shown before accepting, deaf-driver note and message cards; family links (accept needed, trips shared only if each person turns it on); price lock ₹49 / 7 days (pay the lower of locked and normal fare) |
-| Drivers (step 8b D) | ✅ works | daily pass (wallet or Razorpay) = 100% of fares on rides accepted that day; heading home (only rides ending ≥1 km closer to home, 2 a day, off within 1 km of home); fatigue from real online sessions (10 h without a 30-min break → offline until the break; riders see driving time and "Well rested"); station queues at Howrah, Sealdah, airport (front of queue gets the pickup for 45 s, then the next; riders see their place in line) |
-| Growth (step 8b E) | ✅ works | referral codes (riders ₹50 each after the first paid trip; drivers ₹200 after 20 trips); loyalty points with tiers, redeemed as wallet credit; corporate accounts: Hopin admin creates the company, company admin tops up a company wallet (Razorpay), invites employees with monthly limits, exports a CSV; business rides paid from the company wallet and refunded back to it |
-| Trip recording (step 8b F) | ✅ works | rider or driver records trip audio (other person told); encrypted server-side (AES-256-GCM, `RECORDING_KEY`) into a private Supabase bucket; playable only by admins after the recorder sends it to safety, every play logged; unsent recordings deleted after 7 days |
-| Monsoon waterlogging (step 8b G) | ✅ works | riders and drivers report flooded spots from their GPS (depth: ankle / knee / not passable); nearby people confirm or clear them; spots show on the map, expire after 6 h without confirmation, and add expected minutes to quoted and live ETAs (fare unchanged); admins remove false reports |
-| Installable app + push (step 9) | ✅ works | add to home screen (manifest, icons, service worker with an offline page); every notification also arrives as a Web Push with the app closed (encrypted per browser, VAPID-signed); Profile → App & notifications |
-| Languages (step 10) | ✅ English + हिन्दी | switch on sign-in and in the header, saved on the profile; all notifications, push and SMS to riders/drivers in their language; navigation, statuses, sign-in, SOS and ride screens translated (the rest after the UI redesign) |
-| Live ETA (step 11) | ✅ works (OpenRouteService key added) | live trip ETAs from the real road route (OpenRouteService, every 30 s at most, quota-aware; falls back to OSRM, then an estimate) |
-| Driver payouts (step 12) | ✅ works (manual) | drivers save UPI/bank (encrypted) and request withdrawals; an admin pays by UPI/bank and records the UTR; money held on request and returned on reject/cancel |
-| Security (step 13) | ✅ | every route audited, rate limits, security headers, 0 known dependency vulnerabilities |
-| Email (receipts, Supabase sign-up/reset emails) | ✅ connected | Gmail SMTP in Hopin (`SMTP_*`) and in Supabase's SMTP settings; `npm run test-email -- you@x` |
-| Email verification, Google sign-in, password reset | ✅ works | via Supabase Auth; Supabase's built-in mailer sends only a few emails per hour until SMTP (step 2) |
-| Phone verification + phone sign-in (SMS OTP) | ✅ connected (Twilio trial: only verified numbers) | Supabase sends codes via Twilio Verify; Hopin asks Supabase's admin API before marking a number verified. Once on, riders must verify to book and drivers to go online/accept |
-| Driver verification | ✅ works | licence, RC, insurance, photo → private Supabase Storage bucket; admin approves/rejects; only fully approved, in-date drivers can go online or accept; RC/insurance tied to the vehicle plate |
-| Automatic SOS texts | ✅ connected (Twilio trial: only verified numbers) | Twilio Messaging (`TWILIO_*`); each contact's real Twilio result is shown and stored ("sent to Twilio" ≠ delivered) |
+---
 
-`GET /api/features` reports this live, and the app only offers what is reported as connected.
+## Contents
 
-## Run it
+1. [Introduction](#1-introduction)
+2. [Research](#2-research)
+3. [Tech stack and why](#3-tech-stack-and-why)
+4. [Libraries](#4-libraries)
+5. [Architecture](#5-architecture)
+6. [How the app works](#6-how-the-app-works)
+7. [Functionality with screenshots](#7-functionality-with-screenshots)
+8. [Run it locally](#8-run-it-locally)
+9. [Deployment](#9-deployment)
+10. [Conclusion](#10-conclusion)
+
+---
+
+## 1. Introduction
+
+Hopin is a full-stack ride-hailing platform built for Kolkata. It has three apps in one codebase:
+
+- **Rider app:** book a bike, auto or cab, see the fare before booking, follow the driver live on a map, chat, pay by cash, wallet, card or UPI, and get a PDF receipt.
+- **Driver app:** go online, receive nearby ride requests, navigate to the pickup, start the trip only with the rider's 4-digit code, collect payment and request payouts.
+- **Admin console:** a live city map, SOS and route alerts, driver document checks, support tickets, refunds, promotions and payouts.
+
+One rule shaped the whole project: **nothing is simulated.** Every number on screen comes from the database or a live connection. Payments go through Razorpay (test mode), SMS through Twilio, and sign-in through Supabase Auth. If a service is not connected, the app says so instead of pretending.
+
+## 2. Research
+
+Kolkata already has Uber, Ola, Rapido and the state-backed Yatri Sathi, alongside yellow taxis and shared autos. Before building, I listed the problems riders and drivers most often raise about ride apps, and designed a feature against each one:
+
+| Commonly reported problem | What Hopin does about it |
+|---|---|
+| Fares change after booking, and surge pricing is a black box | The fare is fixed when you book. Surge shows the real numbers behind it ("14 riders, 6 drivers nearby"), and you can ask to be told when it's back to normal. A price lock holds a fare for 7 days. |
+| Safety, especially for women travelling at night | SOS texts your emergency contacts with your live location and alerts admins. A trip that leaves the planned road route raises an alert. After a 10 pm–6 am trip Hopin asks "Reached safely?" and alerts contacts if there's no answer. Trip PIN, audio recording, and 112/108 buttons. |
+| Drivers lose a large share of each fare to commission | Drivers choose: an 80/20 split, or a daily pass (₹29 bike, ₹49 auto, ₹79 cab) and keep 100% that day. Every receipt shows where the money went. |
+| The driver cancels late and the rider is stranded | A late driver cancellation credits the rider automatically, paid by the driver. |
+| Monsoon waterlogging makes ETAs meaningless | Riders and drivers report flooded streets from their GPS. Others confirm or clear them, and ETAs add the expected delay. |
+| Many riders and most drivers prefer Hindi or Bengali | Full English and Hindi, including SMS and push notifications in each user's language. |
+| Chaotic pickups at Howrah, Sealdah and the airport | Fair first-in-line queues for drivers at those stations. |
+| Patchy mobile data | An installable PWA with an offline page, skeleton loading, and push notifications that work with the app closed. |
+
+The research also set limits. Ride insurance, ambulance tie-ups and metro ticketing need business partnerships, so Hopin does not fake them. It offers the government 108 ambulance number instead.
+
+## 3. Tech stack and why
+
+| Layer | Choice | Why this and not something else |
+|---|---|---|
+| Frontend | **React 19 + Vite** | The component model suits three apps that share one design system. Vite builds in seconds and splits every page into its own chunk, so riders on slow phones only download the screen they open. |
+| Styling | **Tailwind CSS 4** + own design system (`client/src/ds`) | Utility classes keep styles next to markup. Design tokens give one source for colour, spacing and dark mode, all checked for WCAG AA contrast. |
+| Backend | **Node.js + Express 5** | Same language as the frontend. Express 5 handles async errors natively, which keeps route code short. |
+| Real-time | **Socket.IO** | Driver location, ride offers and status changes must reach phones instantly. Socket.IO adds reconnection, a room per user (and one for admins), and a fallback when WebSockets are blocked. |
+| Database | **PostgreSQL on Supabase** | Rides, wallets and payouts are money: they need transactions, constraints (one active ride per person) and joins, which is why a document database like MongoDB was ruled out. Supabase gives hosted Postgres with Row Level Security, free. |
+| Auth | **Supabase Auth** | Email, Google and phone OTP sign-in without storing a single password in Hopin. The server verifies Supabase's signed tokens. |
+| Payments | **Razorpay** | Indian cards, UPI and netbanking, with signature-verified checkout, a refunds API and webhooks. |
+| SMS | **Twilio** | Phone verification codes and SOS texts, with the real delivery result stored. |
+| Maps | **OpenStreetMap + Leaflet**, **OSRM** and **OpenRouteService** routing, **Photon/Nominatim** search | Free and open, with no Google Maps billing account needed. |
+| Hosting | **Vercel** (frontend) + **Render** (API) | Both free. Vercel serves the static files from a CDN. Render keeps the WebSocket server running, which Vercel's serverless functions cannot. |
+
+## 4. Libraries
+
+**Frontend (`client/package.json`)**
+
+| Library | What it does in Hopin |
+|---|---|
+| `react`, `react-dom` | UI |
+| `react-router-dom` | Pages and deep links (`/trips/:id`, `/track/:token`) |
+| `@supabase/supabase-js` | Sign-in and session refresh |
+| `socket.io-client` | Live ride updates and driver location |
+| `leaflet`, `react-leaflet` | Maps, routes and markers |
+| `framer-motion` | Short (under 250 ms) transitions and the draggable bottom sheet; respects reduced motion |
+| `lottie-react` | Small animations (searching, payment done), loaded only when shown |
+| `lucide-react` | Every icon |
+| `tailwindcss`, `@tailwindcss/vite` | Styling |
+| `@fontsource-variable/bricolage-grotesque`, `@fontsource/mukta` | Self-hosted fonts; Mukta covers Devanagari for Hindi |
+| `playwright` (dev) | Screenshot harness that drives every screen at phone and desktop sizes |
+
+**Backend (`server/package.json`)**
+
+| Library | What it does in Hopin |
+|---|---|
+| `express` | REST API (`server/src/routes`) |
+| `socket.io` | Real-time hub: presence, dispatch, live location (`server/src/hub.js`) |
+| `pg` | PostgreSQL connection pool to Supabase |
+| `@electric-sql/pglite` | Postgres in memory for the test suite, so tests never touch real data |
+| `jose` | Verifies Supabase's ES256 sign-in tokens |
+| `helmet`, `cors`, `express-rate-limit` | Security headers, the allowed origin, per-IP rate limits |
+| `pdfkit` | PDF receipts |
+| `nodemailer` | Receipt and notification emails over SMTP |
+| `web-push` | Push notifications to closed apps (VAPID) |
+
+Razorpay, Twilio, OpenRouteService and OSRM are called over their HTTP APIs directly, without SDKs.
+
+## 5. Architecture
+
+```mermaid
+flowchart LR
+  subgraph Phone["Rider / Driver / Admin (browser or installed PWA)"]
+    UI["React app<br/>pages + design system"]
+    SW["Service worker<br/>offline page + push"]
+  end
+
+  subgraph Vercel["Vercel CDN"]
+    Static["Built frontend<br/>+ security headers"]
+  end
+
+  subgraph Render["Render: Node.js"]
+    API["Express REST API<br/>auth, rides, payments, safety, admin"]
+    Hub["Socket.IO hub<br/>dispatch, live location, status"]
+    Jobs["Timers<br/>scheduled rides, safety checks, clean-up"]
+  end
+
+  subgraph Supabase
+    DB[("PostgreSQL<br/>19 migrations, RLS")]
+    Auth["Auth<br/>email, Google, phone OTP"]
+    Store["Private storage<br/>driver documents, encrypted audio"]
+  end
+
+  Razorpay["Razorpay<br/>cards, UPI, refunds"]
+  Twilio["Twilio<br/>OTP + SOS SMS"]
+  Maps["OpenStreetMap tiles<br/>OSRM / ORS routing<br/>Photon search"]
+
+  UI -- "loads app" --> Static
+  UI -- "HTTPS /api" --> API
+  UI <-- "WebSocket" --> Hub
+  UI -- "sign in" --> Auth
+  UI -- "map tiles" --> Maps
+  API --> DB
+  Hub --> DB
+  Jobs --> DB
+  API -- "verify token" --> Auth
+  API --> Store
+  API <--> Razorpay
+  API --> Twilio
+  API --> Maps
+  API -- "Web Push" --> SW
+```
+
+**How a request is protected:**
+1. Every API call carries the Supabase access token.
+2. The server verifies its signature with `jose`.
+3. It loads the Hopin profile and role.
+4. The route checks the role and ownership; for example, a rider can only see their own rides.
+5. All SQL is parameterised.
+
+Rate limits sit in front of sign-in, booking and search.
+
+**Data model highlights** (`server/migrations`):
+- `users`
+- `rides`: one active ride per rider and per driver, enforced by the database
+- `wallet_txns`: every balance equals its history
+- payments: `payment_orders`, `refunds`
+- safety: `sos_alerts`, `route_deviations`, `safety_checks`
+- also `driver_documents`, `support_tickets`, `ride_messages`, `trip_recordings`, `waterlog_reports`, `payouts`
+
+## 6. How the app works
+
+### A ride from start to finish
+
+```mermaid
+sequenceDiagram
+  autonumber
+  actor R as Rider
+  participant S as Hopin server
+  actor D as Driver
+  participant P as Razorpay
+
+  R->>S: Pickup + drop (searched on OpenStreetMap)
+  S-->>R: Road route + fares for bike, auto, cab
+  R->>S: Book cab
+  S->>D: Offer to nearby online, verified drivers (Socket.IO)
+  D->>S: Accept
+  S-->>R: Driver, vehicle, plate, ETA, 4-digit start code
+  loop every few seconds
+    D->>S: GPS position
+    S-->>R: Driver moves on the map
+  end
+  D->>S: Arrived
+  R-->>D: Says the start code
+  D->>S: Start trip with code
+  Note over S: Watches the route. 500 m off for 30 s<br/>opens an alert for rider and admins
+  D->>S: Complete trip
+  alt Cash
+    D->>S: Collected cash
+  else Card / UPI / Wallet
+    R->>P: Pay in Razorpay Checkout
+    P-->>S: Signed payment, confirmed with Razorpay
+  end
+  S-->>R: Receipt (PDF + email), rate the driver
+  S-->>D: Earnings credited to driver wallet
+```
+
+### The three apps, in plain words
+
+1. **Sign in** with email, Google or mobile number (OTP). New users pick rider or driver and choose a language.
+2. **Rider:**
+   1. Type where you're going and compare bike, auto and cab fares.
+   2. Book, then watch the driver arrive.
+   3. Give the driver the start code.
+   4. Ride with SOS, trip sharing and chat at hand.
+   5. Pay, then rate the driver.
+3. **Driver:**
+   1. Upload licence, RC, insurance and photo; an admin approves them.
+   2. Go online (this needs real GPS) and accept an offer.
+   3. Pick up the rider and start the trip with their code.
+   4. Drop them off, then collect or confirm payment.
+   5. Withdraw earnings by UPI or bank transfer.
+4. **Admin:** watch the live map and answer SOS and route alerts first. Then review documents and helmet selfies, handle tickets and refunds, and set rental packages, promos and payouts.
+5. **Family and sharing:** anyone with a ride's share link can follow it live without an account, and family members who opt in see each other's trips.
+
+## 7. Functionality with screenshots
+
+> Screenshots are taken by `client/scripts/shots.mjs`, which drives the real app with sample Kolkata data so no real rider's details appear.
+
+### Sign in and onboarding
+
+| Onboarding | Sign in | Desktop sign in |
+|---|---|---|
+| <img src="docs/screenshots/auth-1-onboarding.webp" width="230" alt="Onboarding slide with a yellow taxi" /> | <img src="docs/screenshots/auth-3-login.webp" width="230" alt="Sign-in screen with Google, mobile and email" /> | <img src="docs/screenshots/auth-3-login-desktop.webp" width="420" alt="Desktop sign-in with Kolkata taxi video" /> |
+
+New users see three short slides on their first visit, then sign in with email, Google or a mobile OTP. The background is a real clip of Kolkata's yellow taxis, and it switches to a still image on slow connections.
+
+### Booking a ride (rider)
+
+| Where to? | Choose a ride | Finding a driver |
+|---|---|---|
+| <img src="docs/screenshots/rider-1-home.webp" width="230" alt="Home screen asking where to" /> | <img src="docs/screenshots/rider-2-choose.webp" width="230" alt="Bike, auto and cab fares" /> | <img src="docs/screenshots/rider-3-searching.webp" width="230" alt="Searching for a cab" /> |
+
+Search uses OpenStreetMap. Fares come from the real road distance and time and are shown before booking. Riders can also book a rental or a parcel delivery, and save places like Home and Work.
+
+### The trip
+
+| Driver on the way | Driver arrived | On the trip |
+|---|---|---|
+| <img src="docs/screenshots/rider-4-assigned.webp" width="230" alt="Driver arriving in 4 minutes with start code" /> | <img src="docs/screenshots/rider-5-arrived.webp" width="230" alt="Driver is here" /> | <img src="docs/screenshots/rider-6-ontrip.webp" width="230" alt="4 minutes to destination with SOS" /> |
+
+The rider sees the driver's name, rating, car and plate, and a 4-digit **start code**. The trip can't begin until the driver enters that code, which stops riders getting into the wrong car. SOS is always one tap away during the trip.
+
+### Paying, rating and receipts
+
+| Pay | Rate | Receipt |
+|---|---|---|
+| <img src="docs/screenshots/rider-9-payment-due.webp" width="230" alt="Pay with wallet, UPI or card" /> | <img src="docs/screenshots/rider-7-rate.webp" width="230" alt="Rate your trip" /> | <img src="docs/screenshots/rider-13-receipt.webp" width="230" alt="Trip receipt with fare breakdown" /> |
+
+Card and UPI payments go through Razorpay Checkout. The server checks the payment signature and asks Razorpay to confirm before marking anything paid. Receipts show exactly how much went to the driver and how much to Hopin.
+
+### Safety, help and family
+
+| Live share link | Help and SOS | Family |
+|---|---|---|
+| <img src="docs/screenshots/rider-17-track.webp" width="230" alt="Public live tracking page" /> | <img src="docs/screenshots/rider-15-help.webp" width="230" alt="Help with 112 police and 108 ambulance" /> | <img src="docs/screenshots/rider-16-family.webp" width="230" alt="Family trip sharing" /> |
+
+### Driver app
+
+| Offline | Ride requests | Start with OTP |
+|---|---|---|
+| <img src="docs/screenshots/driver-1-offline.webp" width="230" alt="Driver offline with earnings" /> | <img src="docs/screenshots/driver-2-offers.webp" width="230" alt="Incoming ride request for ₹184" /> | <img src="docs/screenshots/driver-4-otp.webp" width="230" alt="Driver enters the rider's code" /> |
+
+| On the trip | Collect cash | Documents |
+|---|---|---|
+| <img src="docs/screenshots/driver-5-ontrip.webp" width="230" alt="Driver dropping at Technopolis" /> | <img src="docs/screenshots/driver-6-cash.webp" width="230" alt="I collected ₹184 cash" /> | <img src="docs/screenshots/driver-8-documents.webp" width="230" alt="Licence, RC and insurance review status" /> |
+
+Drivers can only go online after an admin approves their licence, RC, insurance and photo, and only with a real GPS position. There is no manual or fake location.
+
+### Hindi
+
+| Choose a ride (हिन्दी) | Driver (हिन्दी) |
+|---|---|
+| <img src="docs/screenshots/hindi-2-choose.webp" width="230" alt="Choose a ride in Hindi" /> | <img src="docs/screenshots/hindi-5-driver.webp" width="230" alt="Driver screen in Hindi" /> |
+
+### Admin console
+
+<img src="docs/screenshots/admin-1-safety-desktop.webp" width="900" alt="Admin: alerts, live stats, live map of drivers and rides, things needing a person" />
+
+<img src="docs/screenshots/admin-2-insights-desktop.webp" width="900" alt="Admin: completed trips over 7 days, vehicle mix, recent activity, SOS alerts" />
+
+- **Live map:** every online driver and every ride in progress.
+- **Needs a person:** open SOS alerts, route alerts, riders not home after a night trip, helmet selfies and tickets.
+- **Below that:** completed trips for the last 7 days, the vehicle mix and recent activity.
+
+All of it comes from the database and refreshes every 20 seconds.
+
+### Desktop and dark mode
+
+| Trips | Dark mode on a trip |
+|---|---|
+| <img src="docs/screenshots/rider-12-trips-desktop.webp" width="440" alt="Trips page on desktop" /> | <img src="docs/screenshots/rider-6-ontrip-desktop-dark.webp" width="440" alt="On-trip screen in dark mode" /> |
+
+## 8. Run it locally
+
+You need Node.js 22+ and a free Supabase project. Copy `server/.env.example` to `server/.env` and fill it in.
 
 ```bash
-npm run setup          # install server + client dependencies
-npm run create-admin   # create your admin account (asks in the terminal)
+npm run setup          # install server + client
+npm run create-admin   # create your admin account
 npm run dev:api        # API + WebSockets on http://localhost:8720
-npm run dev:web        # web app on http://localhost:5190
-npm test               # 45 end-to-end tests on an in-memory database (never touches Supabase)
+npm run dev:web        # app on http://localhost:5190
+npm test               # 45 end-to-end tests on an in-memory database
 ```
 
-Riders and drivers sign up in the app (Supabase Auth), then complete a Hopin profile. Drivers need real location from their device to go online; there is no manual or simulated position.
+The tests cover sign-up, booking, dispatch, the start code, completion, payments, refunds, SOS, route alerts, admin access and more. They run against a throwaway in-memory Postgres.
 
-## Layout
+## 9. Deployment
 
-```
-server/src
-  schema.sql        tables, one-active-ride constraints
-  db.js             Postgres pool (Supabase) or embedded PGlite behind one interface
-  hub.js            Socket.IO: presence, dispatch, surge, live location
-  fare.js promos.js payments.js receipt.js notify.js geo.js
-  create-admin.js   terminal command to create an admin
-  routes/           auth, profile, rides, payments, safety (SOS + track), support, admin
-client/src
-  pages/            Book (rider), Drive (driver), Trips, Profile, Help, Admin, Track, Family, Documents, AuthPage
-  components/       MapView, PlaceInput, RideBits, DriverSheet, Shell, Onboarding, ui
-  ds/               design system: tokens in styles.css, components, BottomSheet, Anim (Lottie), Layout
-  i18n/             en.js / hi.js keys, phrases.hi.js (Hindi for plain-English screen text)
-client/scripts
-  fetch-media.js    downloads + processes the free media into public/media (npm run media)
-  shots.mjs         design-review screenshots of every screen, no backend needed (npm run shots)
-  sheet.mjs         tiles screenshots into one contact sheet for review
-```
+The frontend runs on Vercel (`client/vercel.json`) and the API on Render (`render.yaml`); the database and auth stay on Supabase. [DEPLOY.md](DEPLOY.md) has the step-by-step guide.
 
-## Design system
+## 10. Conclusion
 
-Kolkata yellow-taxi brand: warm paper background, ink text, taxi yellow (`--accent #ffc21a`) only for
-the one main action on a screen. Bricolage Grotesque for headings, Mukta (with Devanagari) for text.
-Icons are lucide-react only; vehicles use `ds/icons.jsx` (lucide has no auto-rickshaw, so one is drawn
-on its grid). Every screen is built from `src/ds`: Button, Input, Chip, Badge, Notice, Card, Tabs,
-Switch, Modal, BottomSheet (draggable, snap points, pinned footer; a side panel on desktop),
-Skeleton/ListSkeleton (no spinners for content), EmptyState, Page/Section, Anim, Illustration.
-Touch targets are at least 44 px; colours meet WCAG AA in light and dark; motion stays under 250 ms
-and respects reduced motion. `/design-preview` (dev builds only) shows every component and state.
+Hopin shows that a ride-hailing app can be built end to end with free and open tools and still be real. It has actual sign-in, actual payments (in test mode), actual SMS, and live maps. Its database enforces the rules that matter, like one active ride at a time and wallets that always add up.
 
-`npm run shots` drives the real app in Playwright at 375 and 1280 px, light and dark, with realistic
-Kolkata data mocked at the network layer (API, Socket.IO, Supabase session, GPS). It reports page
-errors, sideways overflow and any API call a screen makes that isn't mocked. Screens land in
-`design/screens/`.
+**What I learned:**
+- Real-time systems are mostly about the unhappy paths: no drivers, a lost connection, GPS off, a payment half done.
+- Money must live in one ledger with database constraints.
+- Safety features only help if they work without the rider having to do anything.
 
-## Media
+**What's next:**
+- An always-on server, so night-ride safety checks never wait for the free tier to wake up.
+- Bengali as a third language.
+- An own routing server, so routes can avoid flooded streets instead of only adding the delay.
+- Partnerships that code can't replace: ride insurance and an ambulance tie-up.
 
-All free, all served from `client/public/media` (no hotlinking); `npm run media` rebuilds them and
-`public/media/CREDITS.md` lists every source and licence.
-
-- Login background: a 10-second clip of Kolkata's yellow taxis (Pexels), graded warm, 720p, muted,
-  WebM (936 KB) + H.264 MP4 (1.2 MB) + poster (79 KB). It plays only without reduced motion,
-  Save-Data or a 2G/3G connection; otherwise the poster shows. Login screen total stays under 1.5 MB.
-- Onboarding (first visit only): three Pexels photos as AVIF + WebP at 480/960/1440 w with a
-  blurred inline placeholder.
-- Lottie (LottieFiles, loaded only when shown, each under 25 KB): searching, payment success, trip
-  complete, empty trips, no internet; recoloured to the brand.
-- unDraw illustrations recoloured to the accent: no drivers, no tickets, no family members.
+More detail: [technical reference](docs/TECHNICAL.md) · [build plan](HOPIN_PLAN.md) · [feature overview](HOPIN_OVERVIEW.md) · [media credits](client/public/media/CREDITS.md)
